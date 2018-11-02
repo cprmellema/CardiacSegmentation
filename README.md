@@ -6,3 +6,4 @@ On  November 9 –10,  the UT  Southwestern  (UTSW)  Lyda  Hill  Department  of 
 
 We aim to develop an automated deep-learning classifier that segments cardiac MRI and CT images. I.E. we will try and develop an automated system that will label different regions of the heart from both CT and MRI imaging, as seen in the exmple image below.
 
+![Pic](ExampleCardiacSeg.png)
