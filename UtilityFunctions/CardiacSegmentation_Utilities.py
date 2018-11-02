@@ -1,4 +1,12 @@
+"""
+This file contains utility funtions to be used in the Cardiac
+Segmentation Hackathon Challenge at the UTSW Hack-Med event on
+Nov 9-10, 2018. The contributors to this file include:
+Cooper Mellema
+"""
+
 import numpy as np
+from keras import backend as K
 
 def fLogDiceloss(aPredictedVolumes, aActualVolumes):
     """
@@ -15,6 +23,10 @@ def fLogDiceloss(aPredictedVolumes, aActualVolumes):
     :param aActualVolumes: a 3d array with the true volume labels
     :return: the log of the dice score
     """
+    # May or may not need the tensor->array conversion, depending on how
+    # output is formatted. No tests done on grayed out code
+    # aPredictedVolumes = K.clip(aPredictedVolumes, K.epsilon(), 1-K.epsilon())
+
     flDiceLoss = ((2 * np.abs(np.intersect1d(aPredictedVolumes, aActualVolumes).size))
                    /(aPredictedVolumes.size + aActualVolumes.size)
                   )
