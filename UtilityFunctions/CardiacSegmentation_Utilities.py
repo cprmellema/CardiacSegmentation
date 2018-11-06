@@ -7,6 +7,11 @@ Cooper Mellema
 
 import numpy as np
 from keras import backend as K
+import pandas as pd
+import os
+import sys
+import SimpleITK as sitk
+
 
 def fLogDiceloss(aPredictedVolumes, aActualVolumes):
     """
@@ -34,3 +39,37 @@ def fLogDiceloss(aPredictedVolumes, aActualVolumes):
     flLogDiceLoss = np.log(flDiceLoss)
 
     return flLogDiceLoss
+
+class cPreprocess(object):
+    """ This class contains all the methods for preprocessing the Cardiac Segmentation Data
+    The general function types contained herein are as follows:
+    -Functions to fetch Raw Data
+    -Functions to fetch Training/Test Data
+    -Functions to normalize Training and Test Data
+    -Functions to reformat Training and Test Data
+    """
+
+    def __init__(self):
+        self.RawDataLocation = '/project/bioinformatics/DLLab/shared/Collab-Aashoo/WholeHeartSegmentation'
+        self.ProcessedDataLocation = '/project/bioinformatics/DLLab/shared/Collab-Aashoo/WholeHeartSegmentation'
+        self.TrainDataLocation = os.path.join(self.RawDataLocation, 'mr_train')
+        self.TestDataLocation = os.path.join(self.ProcessedDataLocation, 'mr_test')
+
+    def fFetchRawDataFile(self, sPath):
+        NIIFile = sitk.ReadImage(os.path.join(sPath))
+        return NIIFile
+
+    def fNIIFileToArray(self, NIIFile):
+        aDerivedImg = sitk.Cast(NIIFile, sitk.sitkFloat32)
+        aDerivedImg = sitk.GetArrayViewFromImage(aDerivedImg)
+        return aDerivedImg
+
+    def fFetchTrainingData(self, sNIIFileName):
+        NIIFile = self.fFetchRawDataFile((os.path.join(self.TrainDataLocation, sNIIFileName)))
+        aDerivedImg = self.NIIFileToArray(NIIFile)
+        return aDerivedImg
+
+    def fFetchTestData(self):
+        pdTestData=pd.DataFrame
+        return pdTestData
+
