@@ -158,7 +158,7 @@ for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
     for iFile, File in enumerate(Files):
         aNormalizedAll[iFile, :, :, :] = Preprocesser.fFetchTrainingData(File, flStd=std, flMean=mean)
 
-# Attempt to create a folder with preprocessed data
+# Create a folder with resliced and resampled data saved as new .nii files
 for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
     Files.sort()
     for iFile, File in enumerate(Files):
