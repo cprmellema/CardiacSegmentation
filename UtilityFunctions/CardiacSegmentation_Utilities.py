@@ -151,6 +151,41 @@ class cPreprocess(object):
         sitk.WriteImage(NIIFileResized, os.path.join(sOutDir,sNIIFileName), True)
 
 
+def fCoregister(NIIFile1, NIIFile2):
+    """
+    Takes 2 .nii files and linearly coregisters them
+    :param NIIFile1: first .nii file
+    :param NIIFile2: second .nii file
+    :return: the transform to coregister the .nii files
+    """
+    # first, initialize an aligining transform
+    cAlign = sitk.CenteredTransformInitializer(NIIFile1, NIIFile2,
+                                               sitk.Euler3DTransform(),
+                                               sitk.CenteredTransformInitializerFilter.GEOMETRY)
+
+    # initialize the registration method
+    cRegistration = sitk.ImageRegistrationMethod()
+
+    cRegistration.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
+    cRegistration.SetMetricSamplingStrategy(cRegistration.RANDOM)
+    cRegistration.SetMetricSamplingPercentage(0.01)
+    cRegistration.SetInterpolator(sitk.sitkLinear)
+
+    cRegistration.SetOptimizerAsGradientDescent(learningRate=1.0, numberOfIterations=100, convergenceMinimumValue=1e-6,
+                                   convergenceWindowSize=10)
+    cRegistration.SetOptimizerScalesFromPhysicalShift()
+
+    # Setup for the multi-resolution framework.
+    cRegistration.SetShrinkFactorsPerLevel(shrinkFactors=[4, 2, 1])
+    cRegistration.SetSmoothingSigmasPerLevel(smoothingSigmas=[2, 1, 0])
+    cRegistration.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
+
+    cRegistration.SetInitialTransform(cAlign, inPlace=False)
+
+    cTransform = cRegistration.Execute(sitk.Cast(NIIFile1, sitk.sitkFloat32),
+                                                  sitk.Cast(NIIFile2, sitk.sitkFloat32))
+
+    return cTransform
 
 
 
@@ -161,7 +196,7 @@ class cPreprocess(object):
 
 
 
-        
+
 
 class cSliceNDice(object):
     """ This class contains all the methods for augmenting and slicing the image
