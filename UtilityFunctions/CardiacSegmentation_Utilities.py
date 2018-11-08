@@ -3,6 +3,7 @@ This file contains utility funtions to be used in the Cardiac
 Segmentation Hackathon Challenge at the UTSW Hack-Med event on
 Nov 9-10, 2018. The contributors to this file include:
 Cooper Mellema
+Paul Acosta
 """
 
 import numpy as np
@@ -89,6 +90,17 @@ class cPreprocess(object):
         # NIIResampled=cResampler.execute(NIIFile)
         NIIResampled=sitk.Resample(NIIFile, self.ReferenceImage)
         return NIIResampled
+        
+    def fPadImage(self, NIIFile):
+        """
+        Pads a .nii file to the parameters set in self
+
+        :param NIIFile: .nii file to be set at origin, spacing, direction
+        :return
+        """
+        NIIPadded = sitk.MirrorPad(NIIFile, self.ReferenceImage)
+        return NIIPadded
+
 
     def fNIIFileToNormArray(self, NIIFile, flStd=1, flMean=0):
         """ Returns normalized array from the .nii file
@@ -122,6 +134,11 @@ class cPreprocess(object):
     def fFetchTestData(self):
         pdTestData=pd.DataFrame
         return pdTestData
+    
+    def fSave_ITK(self, sNIIFileName, sOutDir):
+        NIIFile = self.fFetchRawDataFile((os.path.join(self.TrainDataLocation, sNIIFileName)))
+        NIIFileResized = self.fResizeImage(NIIFile)
+        sitk.WriteImage(NIIFileResized, os.path.join(sOutDir,sNIIFileName), True)
 
 class cSliceNDice(object):
     """ This class contains all the methods for augmenting and slicing the image
@@ -168,6 +185,7 @@ class cSliceNDice(object):
 ##############What follows is an example of how to use the preprocesser##################
 Preprocesser=cPreprocess()
 
+# Convert all files to normalized arrays arrays after they have been preprocessed
 for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
     Files.sort()
     aUnNormalizedAll = np.zeros(np.append(len(Files), Preprocesser.ReferenceImageParams['size']))
@@ -182,3 +200,12 @@ for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
     aNormalizedAll = np.zeros(np.append(len(Files), Preprocesser.ReferenceImageParams['size']))
     for iFile, File in enumerate(Files):
         aNormalizedAll[iFile, :, :, :] = Preprocesser.fFetchTrainingData(File, flStd=std, flMean=mean)
+
+# Create a folder with resliced and resampled data saved as new .nii files
+for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
+    Files.sort()
+    for iFile, File in enumerate(Files):
+        print(File)
+        outDir= 'project/bioinformatics/DLLab/shared/Collab-Aashoo/WholeHeartSegmentation/mr_train_resized/'
+        Preprocesser.fSave_ITK(File, outDir)
+
