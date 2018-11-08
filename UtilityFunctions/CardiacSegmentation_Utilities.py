@@ -101,7 +101,6 @@ class cPreprocess(object):
         NIIPadded = sitk.MirrorPad(NIIFile, self.ReferenceImage)
         return NIIPadded
 
-
     def fNIIFileToNormArray(self, NIIFile, flStd=1, flMean=0):
         """ Returns normalized array from the .nii file
 
@@ -132,10 +131,21 @@ class cPreprocess(object):
         return aDerivedImg
 
     def fFetchTestData(self):
+        """
+        fetches the full test data from the file path specified in self
+        :return: the test data (***paths or arrays or what?) in a pandas
+        dataframe
+        """
         pdTestData=pd.DataFrame
         return pdTestData
     
     def fSave_ITK(self, sNIIFileName, sOutDir):
+        """
+        Saves a new NII file after processing
+        :param sNIIFileName: string file name of the .nii file being loaded
+        :param sOutDir: string of directory to save file to
+        :return:
+        """
         NIIFile = self.fFetchRawDataFile((os.path.join(self.TrainDataLocation, sNIIFileName)))
         NIIFileResized = self.fResizeImage(NIIFile)
         sitk.WriteImage(NIIFileResized, os.path.join(sOutDir,sNIIFileName), True)
@@ -174,12 +184,81 @@ class cSliceNDice(object):
 
         # Generate the step size based on the flSigma parameter
         flStep = abs(np.random.normal(0, flSigma))
-        aStep = aDirection * flStep
+
+        # Initialize the translation class
+        cTranslator = sitk.TranslationTransform(3)
+        cTranslator.SetOffset((aDirection[0]*flStep, aDirection[1]*flStep, aDirection[2]*flStep))
 
         # Translate the NIIFile
-        NIIFileTranslated = self.NIIFile
+        NIIFileTranslated = sitk.Resample(self.NIIFile, cTranslator)
 
         return NIIFileTranslated
+
+    def fPatch(self, aCenter = 'any', iSize = 64):
+        """ Cuts a small sub-patch out of the larger image for data augmentation
+        :param center: the center of the subsampled region
+        :param size: the size of the subsampled patch
+        :return: a new NII file of the subsampled region
+        """
+        # Set the point where the patch will be (by default, doesn't go over the edges
+        # of the image)
+        flNIIWidth=self.NIIFile.GetSize()[0]
+
+        if aCenter=='any':
+            flXTranslation = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
+            flYTranslation = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
+            flZTranslation = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
+            aCenter=[flXTranslation, flYTranslation, flZTranslation]
+
+        aCropsize=[iSize, iSize, iSize]
+
+        # Initialize the crop class
+        cCropper=sitk.CropImageFilter()
+        cCropper.se
+
+        NIIPatch = self.NIIFile
+
+        return NIIPatch
+
+    def fWarp(self, flMaxScale=0.2, bIsotropic=True):
+        """Warps a .nii file by flMaxScale percent up or down
+        :param max_scale: the percent up or down an image dimension will be scaled
+        :param bIsotropic: if true, the image will be scaled isotropically (all dimensions
+            scaled the same amount), else each dimension will be separately scaled up or down
+        :return: rescaled .nii file
+        """
+        # Generate the scaling factor
+        if bIsotropic:
+            flScaleFactor = np.random.uniform(-flMaxScale, flMaxScale)
+        else:
+            aScaleFactor = [np.random.uniform(-flMaxScale, flMaxScale),
+                            np.random.uniform(-flMaxScale, flMaxScale),
+                            np.random.uniform(-flMaxScale, flMaxScale)
+                            ]
+
+        # Initialize the transformer
+        cTransform=sitk.AffineTransform(3)
+        if bIsotropic:
+            aWarp=np.zeros((3,3,3))
+            aWarp[0,0,0]=1+flScaleFactor
+            aWarp[1,1,1]=1+flScaleFactor
+            aWarp[2,2,2]=1+flScaleFactor
+        else:
+            aWarp=np.zeros((3,3,3))
+            aWarp[0,0,0]=1+aScaleFactor[0]
+            aWarp[1,1,1]=1+aScaleFactor[1]
+            aWarp[2,2,2]=1+aScaleFactor[2]
+
+        cTransform.SetMatrix(aWarp.ravel())
+
+        # Do the resampling
+        NIIWarped = sitk.Resample(self.NIIFile, cTransform)
+
+        return NIIWarped
+
+    def fRotate(self, flMaxDegree):
+
+    def fShear(self, flMaxShear, bIsotropic=True):
 
 
 ##############What follows is an example of how to use the preprocesser##################
