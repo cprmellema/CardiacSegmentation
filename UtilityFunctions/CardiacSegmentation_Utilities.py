@@ -123,6 +123,49 @@ class cPreprocess(object):
         pdTestData=pd.DataFrame
         return pdTestData
 
+class cSliceNDice(object):
+    """ This class contains all the methods for augmenting and slicing the image
+    The general function types contained herein are as follows:
+    -Functions to take subsections of the data
+    -functions to spatially jitter the data
+    -functions to rotate the data
+    """
+
+    def __init__(self, NIIFile):
+        self.NIIFile = NIIFile
+
+    def fJitter(self, flSigma = 10, aDirection = 'any'):
+        """ This function translates a function using a gaussian
+        process defined by flSigma, (std of the 3D gaussian)
+        :param:flSigma: the std of a gaussian used to move the image
+        :param:aDirection: a vector of the aDirection to translate the image
+            default: 'any' means that the aDirection is chosen randomly
+        :return: NIIFile, translated
+        """
+
+        if aDirection == 'any':
+            aDirection = np.array([np.random.normal(0, 1) for i in range(3)])
+
+        # Normalize the direction vector
+        flNorm = float(np.linalg.norm(aDirection, ord=1))
+        if flNorm == 0:
+            raise ValueError("'direction' vector has length 0"
+                             "\ndivide by 0 error when normalizing direction vector")
+        else:
+            aDirection = np.array(aDirection)
+            aDirection = (aDirection/flNorm)
+
+        # Generate the step size based on the flSigma parameter
+        flStep = abs(np.random.normal(0, flSigma))
+        aStep = aDirection * flStep
+
+        # Translate the NIIFile
+        NIIFileTranslated = self.NIIFile
+
+        return NIIFileTranslated
+
+
+##############What follows is an example of how to use the preprocesser##################
 Preprocesser=cPreprocess()
 
 for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
