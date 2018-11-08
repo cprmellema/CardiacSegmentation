@@ -4,7 +4,6 @@ Segmentation Hackathon Challenge at the UTSW Hack-Med event on
 Nov 9-10, 2018. The contributors to this file include:
 Cooper Mellema
 Paul Acosta
-
 """
 
 import numpy as np
@@ -60,14 +59,14 @@ class cPreprocess(object):
 
         # Initialize the reference image that other images will be resampled based on
         self.ReferenceImageParams = {'origin': np.zeros(self.Dimension), # sets the origin of the image to [0,0,0]
-                                     #'direction': np.identity(self.Dimension).flatten(), # sets direction to [1,1,1] (arbitrary)
-                                     'size': [288]*self.Dimension, # downsample and/or upsample to 256x256x256
+                                     'direction': np.identity(self.Dimension).flatten(), # sets direction to [1,1,1] (arbitrary)
+                                     'size': [128]*self.Dimension, # downsample and/or upsample to 128x128x128
                                      'spacing': np.ones(self.Dimension) # set spacing to 1mm (arbitrary selection)
                                     }
         self.ReferenceImage = sitk.Image(self.ReferenceImageParams['size'], 2)
-        # self.ReferenceImage.SetOrigin(self.ReferenceImageParams['origin'])
+        self.ReferenceImage.SetOrigin(self.ReferenceImageParams['origin'])
         self.ReferenceImage.SetSpacing(self.ReferenceImageParams['spacing'])
-        # self.ReferenceImage.SetDirection(self.ReferenceImageParams['direction'])
+        self.ReferenceImage.SetDirection(self.ReferenceImageParams['direction'])
 
     def fFetchRawDataFile(self, sPath):
         """Fetches a .nii file
@@ -80,33 +79,17 @@ class cPreprocess(object):
         NIIFile = sitk.ReadImage(sPath)
         return NIIFile
 
-    def fResizeImage(self, NIIFile, is_label):
+    def fResizeImage(self, NIIFile):
         """ Resizes a .nii file to parameters set in self
-            Performs cropping and reslicing
 
         :param NIIFile: .nii file to be set at origin, spacing, direction
-               is_label: is the image a label for segmentation
         :return:
         """
+        # cResampler=sitk.ResampleImageFilter()
         # cResampler.SetReferenceImage(self.ReferenceImage)
         # NIIResampled=cResampler.execute(NIIFile)
-        # NIIResampled=sitk.Resample(NIIFile, self.ReferenceImage)
-
-        NIIResampled = sitk.ResampleImageFilter()
-        NIIResampled.SetOutputOrigin(NIIFile.GetOrigin())
-        NIIResampled.SetInterpolator(sitk.sitkNearestNeighbor)
-        NIIResampled.SetSize([288,288,288])
-        NIIResampled.SetOutputSpacing(np.ones(3))
-        NIIResampled.SetTransform(sitk.Transform())
-        NIIResampled.SetDefaultPixelValue(NIIFile.GetPixelIDValue())
-
-        if is_label:
-            NIIResampled.SetInterpolator(sitk.sitkNearestNeighbor)
-        else:
-            NIIResampled.SetInterpolator(sitk.sitkBSpline)
-
-        return NIIResampled.Execute(NIIFile)
-
+        NIIResampled=sitk.Resample(NIIFile, self.ReferenceImage)
+        return NIIResampled
 
     def fPadImage(self, NIIFile):
         """
@@ -143,26 +126,82 @@ class cPreprocess(object):
         :return: array of normalized, resized data
         """
         NIIFile = self.fFetchRawDataFile((os.path.join(self.TrainDataLocation, sNIIFileName)))
-        bLabel = 'label' in sNIIFileName
-        NIIFileResized = self.fResizeImage(NIIFile, is_label=bLabel)
+        NIIFileResized = self.fResizeImage(NIIFile)
         aDerivedImg = self.fNIIFileToNormArray(NIIFileResized, **Args)
         return aDerivedImg
 
     def fFetchTestData(self):
+        """
+        fetches the full test data from the file path specified in self
+        :return: the test data (***paths or arrays or what?) in a pandas
+        dataframe
+        """
         pdTestData=pd.DataFrame
         return pdTestData
 
     def fSave_ITK(self, sNIIFileName, sOutDir):
+        """
+        Saves a new NII file after processing
+        :param sNIIFileName: string file name of the .nii file being loaded
+        :param sOutDir: string of directory to save file to
+        :return:
+        """
         NIIFile = self.fFetchRawDataFile((os.path.join(self.TrainDataLocation, sNIIFileName)))
-        print(NIIFile.GetSize())
-        print(NIIFile.GetOrigin())
-        bLabel = 'label' in sNIIFileName
-        NIIFileResized = self.fResizeImage(NIIFile, is_label = bLabel)
+        NIIFileResized = self.fResizeImage(NIIFile)
         sitk.WriteImage(NIIFileResized, os.path.join(sOutDir,sNIIFileName), True)
 
 
 
-<<<<<<< HEAD
+
+
+
+
+
+
+
+
+
+        
+
+class cSliceNDice(object):
+    """ This class contains all the methods for augmenting and slicing the image
+    The general function types contained herein are as follows:
+    -Functions to take subsections of the data
+    -functions to spatially jitter the data
+    -functions to rotate the data
+    """
+
+    def __init__(self, NIIFile):
+        self.NIIFile = NIIFile
+
+    def fJitter(self, flSigma = 10, aDirection = 'any'):
+        """ This function translates a function using a gaussian
+        process defined by flSigma, (std of the 3D gaussian)
+        :param:flSigma: the std of a gaussian used to move the image
+        :param:aDirection: a vector of the aDirection to translate the image
+            default: 'any' means that the aDirection is chosen randomly
+        :return: NIIFile, translated
+        """
+
+        if aDirection == 'any':
+            aDirection = np.array([np.random.normal(0, 1) for i in range(3)])
+
+        # Normalize the direction vector
+        flNorm = float(np.linalg.norm(aDirection, ord=1))
+        if flNorm == 0:
+            raise ValueError("'direction' vector has length 0"
+                             "\ndivide by 0 error when normalizing direction vector")
+        else:
+            aDirection = np.array(aDirection)
+            aDirection = (aDirection/flNorm)
+
+        # Generate the step size based on the flSigma parameter
+        flStep = abs(np.random.normal(0, flSigma))
+
+        # Initialize the translation class
+        cTranslator = sitk.TranslationTransform(3)
+        cTranslator.SetOffset((aDirection[0]*flStep, aDirection[1]*flStep, aDirection[2]*flStep))
+
         # Translate the NIIFile
         NIIFileTranslated = sitk.Resample(self.NIIFile, cTranslator)
 
@@ -265,7 +304,7 @@ class cPreprocess(object):
 ##############What follows is an example of how to use the preprocesser##################
 Preprocesser=cPreprocess()
 
-#Convert all files to normalized arrays arrays after they have been preprocessed
+# Convert all files to normalized arrays arrays after they have been preprocessed
 for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
     Files.sort()
     aUnNormalizedAll = np.zeros(np.append(len(Files), Preprocesser.ReferenceImageParams['size']))
@@ -281,11 +320,11 @@ for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
     for iFile, File in enumerate(Files):
         aNormalizedAll[iFile, :, :, :] = Preprocesser.fFetchTrainingData(File, flStd=std, flMean=mean)
 
-# Create a folder with resized data saved as new .nii files
+# Create a folder with resliced and resampled data saved as new .nii files
 for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
     Files.sort()
     for iFile, File in enumerate(Files):
-        # print(File)
-        #outDir= '/project/bioinformatics/DLLab/Paul/TempData/PreprocessedTrain/'
-        outDir = '/project/bioinformatics/DLLab/shared/Collab-Aashoo/WholeHeartSegmentation/mr_train_resized'
+        print(File)
+        outDir= 'project/bioinformatics/DLLab/shared/Collab-Aashoo/WholeHeartSegmentation/mr_train_resized/'
         Preprocesser.fSave_ITK(File, outDir)
+
