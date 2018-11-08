@@ -205,22 +205,25 @@ class cSliceNDice(object):
         flNIIWidth=self.NIIFile.GetSize()[0]
 
         if aCenter=='any':
-            flXTranslation = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
-            flYTranslation = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
-            flZTranslation = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
-            aCenter=[flXTranslation, flYTranslation, flZTranslation]
+            flXRange = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
+            flYRange = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
+            flZRange = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
+            aCenter=[flXRange, flYRange, flZRange]
 
         aCropsize=[iSize, iSize, iSize]
 
-        # Initialize the crop class
+        # Initialize the crop class and size of the cube
         cCropper=sitk.CropImageFilter()
-        cCropper.se
+        aLimits=[iSize/2, iSize/2, iSize/2]
+        cCropper.SetLowerBoundaryCropSize(aCenter - aLimits)
+        cCropper.SetUpperBoundaryCropSize(aCenter + aLimits)
 
-        NIIPatch = self.NIIFile
+        # Create the patch
+        NIIPatch = cCropper.execute(self.NIIFile)
 
         return NIIPatch
 
-    def fWarp(self, flMaxScale=0.2, bIsotropic=True):
+    def fWarp1D(self, flMaxScale=0.2, bIsotropic=True):
         """Warps a .nii file by flMaxScale percent up or down
         :param max_scale: the percent up or down an image dimension will be scaled
         :param bIsotropic: if true, the image will be scaled isotropically (all dimensions
@@ -256,7 +259,31 @@ class cSliceNDice(object):
 
         return NIIWarped
 
-    def fRotate(self, flMaxDegree):
+    def fRotate(self, flMaxTheta=5, flMaxPhi=5):
+        """Rotates a .nii file by flMax Theta and flMaxPhi
+        :param max_scale: the percent up or down an image dimension will be scaled
+        :param bIsotropic: if true, the image will be scaled isotropically (all dimensions
+            scaled the same amount), else each dimension will be separately scaled up or down
+        :return: rescaled .nii file
+        """
+        # Change Theta and Phi to radians
+        flMaxTheta=flMaxTheta*np.pi/180
+        flMaxPhi=flMaxPhi*np.pi/180
+
+        # Initialize the transformer
+        cTransform=sitk.AffineTransform(3)
+
+        aWarp=np.zeros((3,3,3))
+        aWarp[0,0,0]=1+flScaleFactor
+        aWarp[1,1,1]=1+flScaleFactor
+        aWarp[2,2,2]=1+flScaleFactor
+
+        cTransform.SetMatrix(aWarp.ravel())
+
+        # Do the resampling
+        NIIWarped = sitk.Resample(self.NIIFile, cTransform)
+
+        return NIIWarped
 
     def fShear(self, flMaxShear, bIsotropic=True):
 
