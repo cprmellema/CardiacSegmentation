@@ -173,7 +173,7 @@ class cPreprocess(object):
         print(NIIFileResized.GetSize())
         sitk.WriteImage(NIIFileResized, os.path.join(sOutDir,sNIIFileName))
 
-def fCoregister(NIIFile1, NIIFile2, bSegmentation=False):
+def fCoregister(NIIFile1, NIIFile2, NIIFile2Label, bSegmentation=False):
     """
     adapted from: http://insightsoftwareconsortium.github.io/SimpleITK-Notebooks/Python_html/60_Registration_Introduction.html
     Takes 2 .nii files and linearly coregisters them
@@ -212,14 +212,13 @@ def fCoregister(NIIFile1, NIIFile2, bSegmentation=False):
                                                   sitk.Cast(NIIFile2, sitk.sitkFloat32))
 
     # if the image is a segmentation image, resample using knn, rather than linear interpolation
-    if bSegmentation==False:
-        NIIFile2CoregToNIIFile1 = sitk.Resample(NIIFile2, NIIFile1, cTransform,
-                                            sitk.sitkLinear, 0.0, NIIFile1.GetPixelID())
-    elif bSegmentation==True:
-        NIIFile2CoregToNIIFile1 = sitk.Resample(NIIFile2, NIIFile1, cTransform,
+    NIIFile2CoregToNIIFile1 = sitk.Resample(NIIFile2, NIIFile1, cTransform,
+                                                sitk.sitkLinear, 0.0, NIIFile1.GetPixelID())
+
+    NIIFile2LabelCoregToNIIFile1 = sitk.Resample(NIIFile2Label, NIIFile1, cTransform,
                                                 sitk.sitkNearestNeighbor, 0.0, NIIFile1.GetPixelID())
 
-    return NIIFile2CoregToNIIFile1
+    return NIIFile2CoregToNIIFile1, NIIFile2LabelCoregToNIIFile1
 
 class cSliceNDice(object):
     """ This class contains all the methods for augmenting and slicing the image
@@ -228,6 +227,9 @@ class cSliceNDice(object):
     -functions to spatially jitter the data
     -functions to rotate the data
     """
+    def __init__(self, NIIFile):
+        self.NIIFile=NIIFile
+
     def fJitter(self, flSigma = 10, aDirection = 'any'):
         """ This function translates a function using a gaussian
         process defined by flSigma, (std of the 3D gaussian)
@@ -261,7 +263,7 @@ class cSliceNDice(object):
 
         return NIIFileTranslated
 
-    def fPatch(self, aCenter = 'any', iSize = 64):
+    def fPatch(self, aCenter = 'any', iSize = 64, aLimits=None):
         """ Cuts a small sub-patch out of the larger image for data augmentation
         :param center: the center of the subsampled region
         :param size: the size of the subsampled patch
@@ -277,16 +279,21 @@ class cSliceNDice(object):
             flZRange = np.random.uniform(iSize/2, flNIIWidth-iSize/2)
             aCenter=[flXRange, flYRange, flZRange]
 
-        aCropsize=[iSize, iSize, iSize]
 
         # Initialize the crop class and size of the cube
-        cCropper=sitk.CropImageFilter()
-        aLimits=[iSize/2, iSize/2, iSize/2]
-        cCropper.SetLowerBoundaryCropSize(aCenter - aLimits)
-        cCropper.SetUpperBoundaryCropSize(aCenter + aLimits)
+        # cCropper=sitk.CropImageFilter()
+        if aLimits is None: # if the limits are given, use those, otherwise make a cube around the center
+            aLimits=[iSize/2, iSize/2, iSize/2]
+        lsLowerBound=[int(iC - iL) for iC, iL in zip(aCenter, aLimits)]
+        lsUpperBound=[int(iC + iL) for iC, iL in zip(aCenter, aLimits)]
+        # cCropper.SetLowerBoundaryCropSize(lsLowerBound)
+        # cCropper.SetUpperBoundaryCropSize(lsUpperBound)
 
         # Create the patch
-        NIIPatch = cCropper.execute(self.NIIFile)
+        NIIPatch = self.NIIFile[lsLowerBound[0]:lsUpperBound[0],
+                                lsLowerBound[1]:lsUpperBound[1],
+                                lsLowerBound[2]:lsUpperBound[2]
+                               ]
 
         return NIIPatch
 
@@ -361,25 +368,72 @@ class cSliceNDice(object):
 Preprocesser=cPreprocess()
 
 # # Convert all files to normalized arrays arrays after they have been preprocessed
-for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
-    Files.sort()
-    aUnNormalizedAll = np.zeros(np.append(len(Files), Preprocesser.ReferenceImageParams['size'))
-    for iFile, File in enumerate(Files):
-        aUnNormalizedAll[iFile, :, :, :] = Preprocesser.fFetchTrainingData(File)
-
-std = np.std(aUnNormalizedAll)
-mean = np.mean(aUnNormalizedAll)
-
-for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
-    Files.sort()
-    aNormalizedAll = np.zeros(np.append(len(Files), Preprocesser.ReferenceImageParams['size']))
-    for iFile, File in enumerate(Files):
-        aNormalizedAll[iFile, :, :, :] = Preprocesser.fFetchTrainingData(File, flStd=std, flMean=mean)
+# for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
+#     Files.sort()
+#     aUnNormalizedAll = np.zeros(np.append(len(Files), Preprocesser.ReferenceImageParams['size'))
+#     for iFile, File in enumerate(Files):
+#         aUnNormalizedAll[iFile, :, :, :] = Preprocesser.fFetchTrainingData(File)
+#
+# std = np.std(aUnNormalizedAll)
+# mean = np.mean(aUnNormalizedAll)
+#
+# for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
+#     Files.sort()
+#     aNormalizedAll = np.zeros(np.append(len(Files), Preprocesser.ReferenceImageParams['size']))
+#     for iFile, File in enumerate(Files):
+#         aNormalizedAll[iFile, :, :, :] = Preprocesser.fFetchTrainingData(File, flStd=std, flMean=mean)
 
 # Create a folder with resized data saved as new .nii files
+# for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
+#     Files.sort()
+#     for iFile, File in enumerate(Files):
+#         outDir = '/project/bioinformatics/DLLab/shared/Collab-Aashoo/WholeHeartSegmentation/mr_train_resized'
+#         Preprocesser.fSaveITK(File, outDir)
+
+# do rough coregistration on all files
 for Root, Dirs, Files in os.walk(Preprocesser.TrainDataLocation):
     Files.sort()
     for iFile, File in enumerate(Files):
-        outDir = '/project/bioinformatics/DLLab/shared/Collab-Aashoo/WholeHeartSegmentation/mr_train_resized'
-        Preprocesser.fSave_ITK(File, outDir)
+        # load only the image files, load the labels separately
+        if not 'label' in File:
+
+            if File == 'mr_train_1001_image.nii.gz':
+                # set this file up as the one to coregister to
+                NIIFile1 = Preprocesser.fFetchRawDataFile(os.path.join(Preprocesser.TrainDataLocation, File))
+                cSlicer = cSliceNDice(NIIFile1)
+                NIIFile1 = cSlicer.fPatch(aCenter=[296, 260, 80], iSize=64, aLimits=[128, 128, 64])
+                print('Reference file ' + File + ' is cropped')
+                sitk.WriteImage(NIIFile1, os.path.join(
+                    '/project/bioinformatics/DLLab/shared/Collab-Aashoo/'
+                    'WholeHeartSegmentation/CoregTestAll', (File[:-7] + 'CoregTest.nii.gz')))
+
+                # transform the label file the same
+                LabelFile=File[:-12]+'label.nii.gz'
+                NIIFileLabel1 = Preprocesser.fFetchRawDataFile(os.path.join(Preprocesser.TrainDataLocation, LabelFile))
+                cSlicer = cSliceNDice(NIIFileLabel1)
+                NIIFileLabel1 = cSlicer.fPatch(aCenter=[296, 260, 80], iSize=64, aLimits=[128, 128, 64])
+                print('Reference Label file ' + File + ' is cropped')
+                sitk.WriteImage(NIIFileLabel1, os.path.join(
+                    '/project/bioinformatics/DLLab/shared/Collab-Aashoo/'
+                    'WholeHeartSegmentation/CoregTestAll', (File[:-12] + 'labelCoregTest.nii.gz')))
+
+
+            else:
+                # coregister to the above file
+                LabelFile=File[:-12]+'label.nii.gz'
+                NIIFile = Preprocesser.fFetchRawDataFile(os.path.join(Preprocesser.TrainDataLocation, File))
+                NIIFileLabel = Preprocesser.fFetchRawDataFile(os.path.join(Preprocesser.TrainDataLocation, LabelFile))
+                cSlicer = cSliceNDice(NIIFile)
+                NIIFile = cSlicer.fPatch(aCenter=[296, 260, 80], iSize=64, aLimits=[128, 128, 64])
+                cSlicer = cSliceNDice(NIIFileLabel)
+                NIIFileLabel = cSlicer.fPatch(aCenter=[296, 260, 80], iSize=64, aLimits=[128, 128, 64])
+                print('File number ' + str(iFile) + ' and its label are cropped')
+                NIICoreg, NIICoregLabel = fCoregister(NIIFile1, NIIFile, NIIFileLabel)
+                print('File number ' + str(iFile) + ' and its label are coregistered')
+                sitk.WriteImage(NIICoreg, os.path.join(
+                    '/project/bioinformatics/DLLab/shared/Collab-Aashoo/'
+                    'WholeHeartSegmentation/CoregTestAll', (File[:-7] + 'CoregTest.nii.gz')))
+                sitk.WriteImage(NIICoregLabel, os.path.join(
+                    '/project/bioinformatics/DLLab/shared/Collab-Aashoo/'
+                    'WholeHeartSegmentation/CoregTestAll', (File[:-12] + 'labelCoregTest.nii.gz')))
 
