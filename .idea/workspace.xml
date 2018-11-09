@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="080d465c-a1c7-4dc9-8b16-f55bbfed9531" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/UtilityFunctions/CardiacSegmentationViewer.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UtilityFunctions/CardiacSegmentation_Utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/UtilityFunctions/CardiacSegmentation_Utilities.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -20,11 +20,17 @@
       <file leaf-file-name="CardiacSegmentation_Utilities.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentation_Utilities.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1321">
-              <caret line="123" column="25" lean-forward="true" selection-start-line="123" selection-start-column="25" selection-end-line="123" selection-end-column="25" />
+            <state relative-caret-position="629">
+              <caret line="369" column="30" lean-forward="true" selection-start-line="369" selection-start-column="30" selection-end-line="369" selection-end-column="30" />
               <folding>
-                <element signature="e#204#222#0" expanded="true" />
-                <element signature="e#379#1446#0" />
+                <element signature="e#217#235#0" expanded="true" />
+                <element signature="e#424#1491#0" />
+                <element signature="e#6608#7051#0" />
+                <element signature="e#7115#9502#0" />
+                <element signature="e#10352#11670#0" />
+                <element signature="e#11731#12838#0" />
+                <element signature="e#12904#14266#0" />
+                <element signature="e#14325#15218#0" />
               </folding>
             </state>
           </provider>
@@ -39,6 +45,19 @@
         <option value="Jupyter Notebook" />
       </list>
     </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>direction</find>
+      <find>sigma</find>
+      <find>fixed_image</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>aDirection</replace>
+      <replace>flSigma</replace>
+      <replace>cRegistration</replace>
+      <replace>NIIFile1</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -107,7 +126,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../AutismProject" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -183,25 +202,24 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="28" width="2032" height="1026" extended-state="6" />
+    <frame x="0" y="28" width="2032" height="1025" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="right" x="0" y="0" width="462" height="842" id="Documentation" order="5" side_tool="true" visible="true" weight="0.15649606" />
+      <window_info anchor="right" x="0" y="0" width="458" height="826" id="Documentation" order="5" sideWeight="0.50162864" side_tool="true" visible="true" weight="0.32923228" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32896176" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Python Console" order="7" weight="0.32330826" />
+      <window_info anchor="bottom" id="Python Console" order="7" weight="0.31838074" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32822758" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14862205" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="right" id="SciView" order="4" />
+      <window_info anchor="right" id="SciView" order="4" sideWeight="0.49837133" visible="true" weight="0.32923228" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" weight="0.32459018" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -209,6 +227,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="8" weight="0.32459018" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -217,21 +236,54 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentation_Utilities.py</url>
+          <line>139</line>
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentation_Utilities.py</url>
+          <line>222</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="3" />
+    </breakpoint-manager>
+  </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentationViewer.ipynb">
-      <provider selected="true" editor-type-id="ipnb-editor">
-        <state>
-          <selected id="0" />
+    <entry file="file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentation_Utilities.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2156">
+          <caret line="123" column="25" lean-forward="true" selection-start-line="123" selection-start-column="25" selection-end-line="123" selection-end-column="25" />
+          <folding>
+            <element signature="e#217#235#0" expanded="true" />
+            <element signature="e#424#1491#0" />
+            <element signature="e#6608#7051#0" />
+            <element signature="e#7115#9502#0" />
+            <element signature="e#10352#11670#0" />
+            <element signature="e#11731#12838#0" />
+            <element signature="e#12904#14266#0" />
+            <element signature="e#14325#15218#0" />
+          </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentationViewer.ipynb" />
     <entry file="file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentation_Utilities.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="154">
           <caret line="8" column="30" lean-forward="true" selection-start-line="8" selection-start-column="30" selection-end-line="8" selection-end-column="30" />
           <folding>
-            <element signature="e#204#222#0" expanded="true" />
-            <element signature="e#312#1379#0" />
+            <element signature="e#217#235#0" expanded="true" />
+            <element signature="e#424#1491#0" />
+            <element signature="e#6608#7051#0" />
+            <element signature="e#7115#9502#0" />
+            <element signature="e#10352#11670#0" />
+            <element signature="e#11731#12838#0" />
+            <element signature="e#12904#14266#0" />
+            <element signature="e#14325#15218#0" />
           </folding>
         </state>
       </provider>
@@ -241,8 +293,14 @@
         <state relative-caret-position="726">
           <caret line="34" lean-forward="true" selection-start-line="34" selection-end-line="34" />
           <folding>
-            <element signature="e#204#222#0" expanded="true" />
-            <element signature="e#312#1379#0" />
+            <element signature="e#217#235#0" expanded="true" />
+            <element signature="e#424#1491#0" />
+            <element signature="e#6608#7051#0" />
+            <element signature="e#7115#9502#0" />
+            <element signature="e#10352#11670#0" />
+            <element signature="e#11731#12838#0" />
+            <element signature="e#12904#14266#0" />
+            <element signature="e#14325#15218#0" />
           </folding>
         </state>
       </provider>
@@ -267,13 +325,7 @@
     <entry file="file://$PROJECT_DIR$/UtilityFunctions/.gitkeep">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentationViewer.ipynb">
-      <provider selected="true" editor-type-id="ipnb-editor">
-        <state>
-          <selected id="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentationViewer.ipynb" />
     <entry file="file://$PROJECT_DIR$/../../../shared/CondaEnvironments/HackathonCardiacSegmentationV1/lib/python3.6/site-packages/SimpleITK/SimpleITK.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="204">
@@ -283,11 +335,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/UtilityFunctions/CardiacSegmentation_Utilities.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1321">
-          <caret line="123" column="25" lean-forward="true" selection-start-line="123" selection-start-column="25" selection-end-line="123" selection-end-column="25" />
+        <state relative-caret-position="629">
+          <caret line="369" column="30" lean-forward="true" selection-start-line="369" selection-start-column="30" selection-end-line="369" selection-end-column="30" />
           <folding>
-            <element signature="e#204#222#0" expanded="true" />
-            <element signature="e#312#1379#0" />
+            <element signature="e#217#235#0" expanded="true" />
+            <element signature="e#424#1491#0" />
+            <element signature="e#6608#7051#0" />
+            <element signature="e#7115#9502#0" />
+            <element signature="e#10352#11670#0" />
+            <element signature="e#11731#12838#0" />
+            <element signature="e#12904#14266#0" />
+            <element signature="e#14325#15218#0" />
           </folding>
         </state>
       </provider>
