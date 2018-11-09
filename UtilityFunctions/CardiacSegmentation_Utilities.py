@@ -151,13 +151,15 @@ class cPreprocess(object):
         NIIFileResized = self.fResizeImage(NIIFile)
         sitk.WriteImage(NIIFileResized, os.path.join(sOutDir,sNIIFileName), True)
 
-
-def fCoregister(NIIFile1, NIIFile2):
+def fCoregister(NIIFile1, NIIFile2, bSegmentation=False):
     """
     adapted from: http://insightsoftwareconsortium.github.io/SimpleITK-Notebooks/Python_html/60_Registration_Introduction.html
     Takes 2 .nii files and linearly coregisters them
+    TO NIIFILE1 AS REFERENCE
     :param NIIFile1: first .nii file
     :param NIIFile2: second .nii file
+    :param bSegmentation: set to true if file is segmentation file, does Nearest Neighbor
+        interpolation rather than linear interpolation
     :return: the transform to coregister the .nii files
     """
     # first, initialize an aligining transform
@@ -187,13 +189,15 @@ def fCoregister(NIIFile1, NIIFile2):
     cTransform = cRegistration.Execute(sitk.Cast(NIIFile1, sitk.sitkFloat32),
                                                   sitk.Cast(NIIFile2, sitk.sitkFloat32))
 
-    NIIFile2CoregToNIIFile1 = sitk.Resample(NIIFile2, NIIFile1, cTransform,
+    # if the image is a segmentation image, resample using knn, rather than linear interpolation
+    if bSegmentation==False:
+        NIIFile2CoregToNIIFile1 = sitk.Resample(NIIFile2, NIIFile1, cTransform,
                                             sitk.sitkLinear, 0.0, NIIFile1.GetPixelID())
+    elif bSegmentation==True:
+        NIIFile2CoregToNIIFile1 = sitk.Resample(NIIFile2, NIIFile1, cTransform,
+                                                sitk.sitkNearestNeighbor, 0.0, NIIFile1.GetPixelID())
 
     return NIIFile2CoregToNIIFile1
-
-
-
 
 class cSliceNDice(object):
     """ This class contains all the methods for augmenting and slicing the image
@@ -334,7 +338,6 @@ class cSliceNDice(object):
     def fShear(self, flMaxShear, bIsotropic=True):
         return self
 
-#
 ##############What follows is an example of how to use the preprocesser##################
 Preprocesser=cPreprocess()
 
