@@ -12,6 +12,7 @@ import pandas as pd
 import os
 import sys
 import SimpleITK as sitk
+import matplotlib.pyplot as plt
 
 
 def fLogDiceloss(aPredictedVolumes, aActualVolumes):
@@ -139,7 +140,7 @@ class cPreprocess(object):
         pdTestData=pd.DataFrame
         return pdTestData
 
-    def fSave_ITK(self, sNIIFileName, sOutDir):
+    def fSaveITK(self, sNIIFileName, sOutDir):
         """
         Saves a new NII file after processing
         :param sNIIFileName: string file name of the .nii file being loaded
@@ -153,6 +154,7 @@ class cPreprocess(object):
 
 def fCoregister(NIIFile1, NIIFile2):
     """
+    adapted from: http://insightsoftwareconsortium.github.io/SimpleITK-Notebooks/Python_html/60_Registration_Introduction.html
     Takes 2 .nii files and linearly coregisters them
     :param NIIFile1: first .nii file
     :param NIIFile2: second .nii file
@@ -185,15 +187,10 @@ def fCoregister(NIIFile1, NIIFile2):
     cTransform = cRegistration.Execute(sitk.Cast(NIIFile1, sitk.sitkFloat32),
                                                   sitk.Cast(NIIFile2, sitk.sitkFloat32))
 
-    return cTransform
+    NIIFile2CoregToNIIFile1 = sitk.Resample(NIIFile2, NIIFile1, cTransform,
+                                            sitk.sitkLinear, 0.0, NIIFile1.GetPixelID())
 
-
-
-
-
-
-
-
+    return NIIFile2CoregToNIIFile1
 
 
 
@@ -321,6 +318,7 @@ class cSliceNDice(object):
         # Initialize the transformer
         cTransform=sitk.AffineTransform(3)
 
+        flScaleFactor=0
         aWarp=np.zeros((3,3,3))
         aWarp[0,0,0]=1+flScaleFactor
         aWarp[1,1,1]=1+flScaleFactor
@@ -334,8 +332,9 @@ class cSliceNDice(object):
         return NIIWarped
 
     def fShear(self, flMaxShear, bIsotropic=True):
+        return self
 
-
+#
 ##############What follows is an example of how to use the preprocesser##################
 Preprocesser=cPreprocess()
 
